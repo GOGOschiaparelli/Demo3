@@ -249,17 +249,35 @@
                 canvas.style.width = size.width + "px";
                 canvas.style.height = size.height + "px";
             }
-            async function RequestLandscapeLock() {
+            function RequestFullscreenAndLandscape() {
+                const fullscreenTarget = document.getElementById("orientation-root") || document.documentElement;
+                const fullscreenRequest =
+                    fullscreenTarget.requestFullscreen ||
+                    fullscreenTarget.webkitRequestFullscreen ||
+                    fullscreenTarget.msRequestFullscreen;
                 try {
-                    if (document.documentElement.requestFullscreen && !document.fullscreenElement) {
-                        await document.documentElement.requestFullscreen();
+                    if (fullscreenRequest && !document.fullscreenElement && !document.webkitFullscreenElement) {
+                        const fullscreenPromise = fullscreenRequest.call(fullscreenTarget);
+                        if (fullscreenPromise && fullscreenPromise.then) {
+                            fullscreenPromise
+                                .then(() => {
+                                    if (screen.orientation && screen.orientation.lock) {
+                                        return screen.orientation.lock("landscape");
+                                    }
+                                })
+                                .catch((err) => {
+                                    console.log("Fullscreen or landscape lock unavailable in this browser.", err);
+                                });
+                        }
                     }
-                    if (screen.orientation && screen.orientation.lock) {
-                        await screen.orientation.lock("landscape");
+                    else if (screen.orientation && screen.orientation.lock) {
+                        screen.orientation.lock("landscape").catch((err) => {
+                            console.log("Landscape lock unavailable in this browser.", err);
+                        });
                     }
                 }
                 catch (err) {
-                    console.log("Landscape lock unavailable in this browser.", err);
+                    console.log("Fullscreen unavailable in this browser.", err);
                 }
             }
             window.addEventListener("resize", ApplyLandscapeCanvasSize);
@@ -276,11 +294,12 @@
                     }, 380);
                 }, introDurationMs);
             });
-            async function StartAR() {
-                await RequestLandscapeLock();
+            function StartAR() {
                 ApplyLandscapeCanvasSize();
                 
                 document.getElementById("startARDiv").style.display = "none";
+                loadingBar.style.display = "block";
+                RequestFullscreenAndLandscape();
                 createUnityInstance(document.querySelector("#unity-canvas"), {
                     dataUrl: "Build/Demo3.data",
                     frameworkUrl: "Build/Demo3.framework.js",
@@ -302,7 +321,6 @@
                         RequestWebcam();
                     loadingBar.style.display = "none";
                 });
-                loadingBar.style.display = "block";
             }
             //Set Facing Mode here ('environment', 'user', '')
 		window.unityFacingMode = "environment"
