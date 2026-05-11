@@ -30,6 +30,118 @@
             background: #fffa;
             z-index: 99;
         }
+        .template-screen {
+            background-color: #0700c8;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+        #introDiv {
+            background-image: url("1.jpg");
+            opacity: 1;
+            transition: opacity 350ms ease;
+            z-index: 120;
+        }
+        #introDiv.is-hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        #startARDiv {
+            display: none;
+            background-image: url("2.jpg");
+            color: #fff51f;
+        }
+        .camera-controls {
+            position: absolute;
+            left: 50%;
+            top: 66%;
+            display: flex;
+            width: min(72vw, 720px);
+            max-width: calc(100vw - 32px);
+            flex-direction: column;
+            gap: 14px;
+            align-items: center;
+            transform: translateX(-50%);
+        }
+        #chooseCamSel,
+        #startARButton {
+            box-sizing: border-box;
+            width: 100%;
+            min-height: 44px;
+            border: 2px solid #fff51f;
+            border-radius: 0;
+            background: #0700c8;
+            color: #fff51f;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: clamp(14px, 2.4vw, 24px);
+            letter-spacing: 0;
+        }
+        #chooseCamSel {
+            padding: 0 14px;
+        }
+        #startARButton {
+            cursor: pointer;
+            font-weight: 700;
+        }
+        #unity-loading-bar {
+            inset: 0;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            transform: none;
+            background-image: url("3.jpg");
+            z-index: 110;
+        }
+        #unity-logo,
+        #unity-progress-bar-empty {
+            display: none;
+        }
+        .loading-dots {
+            position: absolute;
+            left: calc(50% + min(23vw, 440px));
+            top: 58%;
+            display: flex;
+            gap: clamp(8px, 1.2vw, 18px);
+            transform: translateY(-50%);
+        }
+        .loading-dots span {
+            width: clamp(9px, 1.25vw, 18px);
+            height: clamp(9px, 1.25vw, 18px);
+            border-radius: 50%;
+            background: #fff51f;
+            animation: loadingDot 1.15s ease-in-out infinite;
+        }
+        .loading-dots span:nth-child(2) {
+            animation-delay: 160ms;
+        }
+        .loading-dots span:nth-child(3) {
+            animation-delay: 320ms;
+        }
+        @keyframes loadingDot {
+            0%, 80%, 100% {
+                opacity: .25;
+                transform: translateY(0);
+            }
+            40% {
+                opacity: 1;
+                transform: translateY(-0.45em);
+            }
+        }
+        @media (orientation: portrait) {
+            .template-screen,
+            #unity-loading-bar {
+                background-size: contain;
+            }
+            .camera-controls {
+                top: 62%;
+                width: min(82vw, 520px);
+            }
+            .loading-dots {
+                left: calc(50% + min(32vw, 160px));
+                top: 48%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -44,10 +156,12 @@
 
     <video id="webcam-video" muted autoplay playsinline style="width:1px;position:absolute"></video>
     <canvas id="video-canvas" style="width:100%; height:100%; object-fit:cover; position:absolute"></canvas>
-    <div id="startARDiv" class="ctaDiv">
-        <select id="chooseCamSel" style="display: none;" onchange="SelectCam()"></select>
-        <p style="text-align: center; width:60vw;">This augmented reality experience requires access to your device's camera</p>
-        <button id="startARButton" onclick="StartAR()" style="display:none">ALLOW ACCESS</button>
+    <div id="introDiv" class="ctaDiv template-screen" aria-label="Opening screen"></div>
+    <div id="startARDiv" class="ctaDiv template-screen">
+        <div class="camera-controls">
+            <select id="chooseCamSel" style="display: none;" onchange="SelectCam()"></select>
+            <button id="startARButton" onclick="StartAR()" style="display:none">ALLOW ACCESS</button>
+        </div>
     </div>
     <div id="screenshotDiv" style="display: none;" class="ctaDiv">
         <div style="position:relative; background-color:white; padding:10px; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.3), 0 6px 20px 0 rgba(0, 0, 0, 0.25);">
@@ -69,11 +183,12 @@
     </div>
     <div id="unity-container" class="unity-mobile">
         <canvas id="unity-canvas" style="width: 100%; height: 100%; background: #0000; z-index: -99"></canvas>
-        <div id="unity-loading-bar">
+        <div id="unity-loading-bar" class="template-screen">
             <div id="unity-logo"></div>
             <div id="unity-progress-bar-empty">
                 <div id="unity-progress-bar-full"></div>
             </div>
+            <div class="loading-dots" aria-hidden="true"><span></span><span></span><span></span></div>
         </div>
         <canvas id="video-canvas"></canvas>
     </div>
@@ -105,6 +220,18 @@
             var canvas = document.querySelector("#unity-canvas");
             var loadingBar = document.querySelector("#unity-loading-bar");
             var progressBarFull = document.querySelector("#unity-progress-bar-full");
+            var introDurationMs = 1700;
+            window.addEventListener("load", () => {
+                setTimeout(() => {
+                    const introDiv = document.getElementById("introDiv");
+                    const startARDiv = document.getElementById("startARDiv");
+                    introDiv.classList.add("is-hidden");
+                    startARDiv.style.display = "flex";
+                    setTimeout(() => {
+                        introDiv.style.display = "none";
+                    }, 380);
+                }, introDurationMs);
+            });
             function StartAR() {
                 canvas.style.width = window.innerWidth + "px";
                 canvas.style.height = window.innerHeight + "px";
