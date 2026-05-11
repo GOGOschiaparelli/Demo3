@@ -28,7 +28,6 @@
             height: 100vh;
             overflow: hidden;
             background: #0700c8;
-            transform-origin: top left;
             touch-action: manipulation;
         }
         .ctaDiv {
@@ -48,7 +47,7 @@
             background-color: #0700c8;
             background-position: center;
             background-repeat: no-repeat;
-            background-size: cover;
+            background-size: 100% 100%;
         }
         #introDiv {
             background-image: url("1.jpg");
@@ -144,14 +143,6 @@
                 transform: translateY(-0.45em);
             }
         }
-        @media (orientation: portrait) {
-            #orientation-root {
-                top: 100%;
-                width: 100vh;
-                height: 100vw;
-                transform: rotate(-90deg);
-            }
-        }
     </style>
 </head>
 <body>
@@ -236,54 +227,7 @@
             document.addEventListener("touchmove", (event) => {
                 event.preventDefault();
             }, { passive: false });
-            function GetLandscapeViewportSize() {
-                return {
-                    width: Math.max(window.innerWidth, window.innerHeight),
-                    height: Math.min(window.innerWidth, window.innerHeight)
-                };
-            }
-            function ApplyLandscapeCanvasSize() {
-                const size = GetLandscapeViewportSize();
-                canvas.width = size.width;
-                canvas.height = size.height;
-                canvas.style.width = size.width + "px";
-                canvas.style.height = size.height + "px";
-            }
-            function RequestFullscreenAndLandscape() {
-                const fullscreenTarget = document.getElementById("orientation-root") || document.documentElement;
-                const fullscreenRequest =
-                    fullscreenTarget.requestFullscreen ||
-                    fullscreenTarget.webkitRequestFullscreen ||
-                    fullscreenTarget.msRequestFullscreen;
-                try {
-                    if (fullscreenRequest && !document.fullscreenElement && !document.webkitFullscreenElement) {
-                        const fullscreenPromise = fullscreenRequest.call(fullscreenTarget);
-                        if (fullscreenPromise && fullscreenPromise.then) {
-                            fullscreenPromise
-                                .then(() => {
-                                    if (screen.orientation && screen.orientation.lock) {
-                                        return screen.orientation.lock("landscape");
-                                    }
-                                })
-                                .catch((err) => {
-                                    console.log("Fullscreen or landscape lock unavailable in this browser.", err);
-                                });
-                        }
-                    }
-                    else if (screen.orientation && screen.orientation.lock) {
-                        screen.orientation.lock("landscape").catch((err) => {
-                            console.log("Landscape lock unavailable in this browser.", err);
-                        });
-                    }
-                }
-                catch (err) {
-                    console.log("Fullscreen unavailable in this browser.", err);
-                }
-            }
-            window.addEventListener("resize", ApplyLandscapeCanvasSize);
-            window.addEventListener("orientationchange", ApplyLandscapeCanvasSize);
             window.addEventListener("load", () => {
-                ApplyLandscapeCanvasSize();
                 setTimeout(() => {
                     const introDiv = document.getElementById("introDiv");
                     const startARDiv = document.getElementById("startARDiv");
@@ -295,11 +239,7 @@
                 }, introDurationMs);
             });
             function StartAR() {
-                ApplyLandscapeCanvasSize();
-                
                 document.getElementById("startARDiv").style.display = "none";
-                loadingBar.style.display = "block";
-                RequestFullscreenAndLandscape();
                 createUnityInstance(document.querySelector("#unity-canvas"), {
                     dataUrl: "Build/Demo3.data",
                     frameworkUrl: "Build/Demo3.framework.js",
@@ -321,6 +261,7 @@
                         RequestWebcam();
                     loadingBar.style.display = "none";
                 });
+                loadingBar.style.display = "block";
             }
             //Set Facing Mode here ('environment', 'user', '')
 		window.unityFacingMode = "environment"
