@@ -224,11 +224,10 @@
     </div>
     <div id="orientationPromptDiv" class="ctaDiv template-screen">
         <div class="rotation-prompt-content">
-            <div>&#35831;&#26059;&#36716;&#33267;&#31446;&#23631;&#27169;&#24335;</div>
-            <div>&#38145;&#23450;&#25163;&#26426;&#33258;&#21160;&#26059;&#36716;&#21151;&#33021;</div>
-            <div>&#28982;&#21518;&#26059;&#36716;&#25163;&#26426;&#20026;&#27178;&#21521;&#32487;&#32493;&#20351;&#29992;</div>
+            <div>Rotate your phone to portrait mode</div>
+            <div>then lock screen rotation before continuing</div>
         </div>
-        <button id="orientationPromptButton" onclick="ContinueAfterOrientationPrompt()" type="button">&#35831;&#26059;&#36716;&#25163;&#26426;</button>
+        <button id="orientationPromptButton" onclick="ContinueAfterOrientationPrompt()" type="button">PLEASE ROTATE PHONE</button>
     </div>
     <div id="screenshotDiv" style="display: none;" class="ctaDiv">
         <div style="position:relative; background-color:white; padding:10px; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.3), 0 6px 20px 0 rgba(0, 0, 0, 0.25);">
@@ -302,12 +301,12 @@
                 if (!button) return;
                 if (IsScreenPortrait()) {
                     button.classList.add("is-ready");
-                    button.innerText = "\u7ee7\u7eed";
+                    button.innerText = "CONTINUE";
                     button.disabled = false;
                 }
                 else {
                     button.classList.remove("is-ready");
-                    button.innerText = "\u8bf7\u65cb\u8f6c\u624b\u673a";
+                    button.innerText = "PLEASE ROTATE PHONE";
                     button.disabled = true;
                 }
             }
