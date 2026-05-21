@@ -87,6 +87,50 @@
             display: none;
             color: #fff51f;
         }
+        #orientationPromptDiv {
+            display: none;
+            color: #fff51f;
+            z-index: 98;
+        }
+        .rotation-prompt-content {
+            position: absolute;
+            left: 50%;
+            top: 48%;
+            width: min(76vw, 820px);
+            transform: translate(-50%, -50%);
+            color: #fff51f;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: clamp(22px, 4vw, 46px);
+            font-weight: 700;
+            line-height: 1.35;
+            letter-spacing: 0;
+            text-align: center;
+        }
+        #orientationPromptButton {
+            position: absolute;
+            left: 50%;
+            bottom: 16%;
+            box-sizing: border-box;
+            width: min(36vw, 260px);
+            min-width: 180px;
+            height: 46px;
+            transform: translateX(-50%);
+            border: 2px solid #6c6912;
+            border-radius: 0;
+            background: #141414;
+            color: #6c6912;
+            cursor: default;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 0;
+        }
+        #orientationPromptButton.is-ready {
+            border-color: #fff51f;
+            background: #0700c8;
+            color: #fff51f;
+            cursor: pointer;
+        }
         .camera-controls {
             position: absolute;
             left: 50%;
@@ -174,9 +218,17 @@
         <div class="screen-art selection-art">
             <div class="camera-controls">
                 <select id="chooseCamSel" style="display: none;" onchange="SelectCam()"></select>
-                <button id="startARButton" onclick="StartAR()" style="display:none">ALLOW ACCESS</button>
+                <button id="startARButton" onclick="ShowOrientationPrompt()" style="display:none">ALLOW ACCESS</button>
             </div>
         </div>
+    </div>
+    <div id="orientationPromptDiv" class="ctaDiv template-screen">
+        <div class="rotation-prompt-content">
+            <div>&#35831;&#26059;&#36716;&#33267;&#31446;&#23631;&#27169;&#24335;</div>
+            <div>&#38145;&#23450;&#25163;&#26426;&#33258;&#21160;&#26059;&#36716;&#21151;&#33021;</div>
+            <div>&#28982;&#21518;&#26059;&#36716;&#25163;&#26426;&#20026;&#27178;&#21521;&#32487;&#32493;&#20351;&#29992;</div>
+        </div>
+        <button id="orientationPromptButton" onclick="ContinueAfterOrientationPrompt()" type="button">&#35831;&#26059;&#36716;&#25163;&#26426;</button>
     </div>
     <div id="screenshotDiv" style="display: none;" class="ctaDiv">
         <div style="position:relative; background-color:white; padding:10px; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.3), 0 6px 20px 0 rgba(0, 0, 0, 0.25);">
@@ -238,9 +290,42 @@
             var progressBarFull = document.querySelector("#unity-progress-bar-full");
             var introDurationMs = 1700;
             var secondIntroDurationMs = 3000;
+            var orientationPromptAccepted = false;
             document.addEventListener("touchmove", (event) => {
                 event.preventDefault();
             }, { passive: false });
+            function IsScreenPortrait() {
+                return window.innerHeight > window.innerWidth;
+            }
+            function UpdateOrientationPromptButton() {
+                const button = document.getElementById("orientationPromptButton");
+                if (!button) return;
+                if (IsScreenPortrait()) {
+                    button.classList.add("is-ready");
+                    button.innerText = "\u7ee7\u7eed";
+                    button.disabled = false;
+                }
+                else {
+                    button.classList.remove("is-ready");
+                    button.innerText = "\u8bf7\u65cb\u8f6c\u624b\u673a";
+                    button.disabled = true;
+                }
+            }
+            function ShowOrientationPrompt() {
+                document.getElementById("startARDiv").style.display = "none";
+                document.getElementById("orientationPromptDiv").style.display = "flex";
+                UpdateOrientationPromptButton();
+            }
+            function ContinueAfterOrientationPrompt() {
+                if (!IsScreenPortrait()) {
+                    UpdateOrientationPromptButton();
+                    return;
+                }
+                orientationPromptAccepted = true;
+                StartAR();
+            }
+            window.addEventListener("resize", UpdateOrientationPromptButton);
+            window.addEventListener("orientationchange", UpdateOrientationPromptButton);
             window.addEventListener("load", () => {
                 setTimeout(() => {
                     const introDiv = document.getElementById("introDiv");
@@ -261,6 +346,11 @@
                 }, introDurationMs);
             });
             function StartAR() {
+                if (!orientationPromptAccepted) {
+                    ShowOrientationPrompt();
+                    return;
+                }
+                document.getElementById("orientationPromptDiv").style.display = "none";
                 document.getElementById("startARDiv").style.display = "none";
                 createUnityInstance(document.querySelector("#unity-canvas"), {
                     dataUrl: "Build/Demo3.data",
