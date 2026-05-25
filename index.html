@@ -55,9 +55,6 @@
         .intro-art {
             background-image: url("1.jpg");
         }
-        .second-intro-art {
-            background-image: url("5.jpg");
-        }
         .selection-art {
             background-image: url("2.jpg");
         }
@@ -69,17 +66,7 @@
             transition: opacity 350ms ease;
             z-index: 120;
         }
-        #secondIntroDiv {
-            display: none;
-            opacity: 1;
-            transition: opacity 350ms ease;
-            z-index: 119;
-        }
         #introDiv.is-hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-        #secondIntroDiv.is-hidden {
             opacity: 0;
             pointer-events: none;
         }
@@ -211,9 +198,6 @@
     <div id="introDiv" class="ctaDiv template-screen" aria-label="Opening screen">
         <div class="screen-art intro-art"></div>
     </div>
-    <div id="secondIntroDiv" class="ctaDiv template-screen" aria-label="Second opening screen">
-        <div class="screen-art second-intro-art"></div>
-    </div>
     <div id="startARDiv" class="ctaDiv template-screen">
         <div class="screen-art selection-art">
             <div class="camera-controls">
@@ -288,7 +272,6 @@
             var loadingBar = document.querySelector("#unity-loading-bar");
             var progressBarFull = document.querySelector("#unity-progress-bar-full");
             var introDurationMs = 1700;
-            var secondIntroDurationMs = 3000;
             var orientationPromptAccepted = false;
             document.addEventListener("touchmove", (event) => {
                 event.preventDefault();
@@ -328,20 +311,12 @@
             window.addEventListener("load", () => {
                 setTimeout(() => {
                     const introDiv = document.getElementById("introDiv");
-                    const secondIntroDiv = document.getElementById("secondIntroDiv");
                     const startARDiv = document.getElementById("startARDiv");
                     introDiv.classList.add("is-hidden");
-                    secondIntroDiv.style.display = "flex";
+                    startARDiv.style.display = "flex";
                     setTimeout(() => {
                         introDiv.style.display = "none";
                     }, 380);
-                    setTimeout(() => {
-                        secondIntroDiv.classList.add("is-hidden");
-                        startARDiv.style.display = "flex";
-                        setTimeout(() => {
-                            secondIntroDiv.style.display = "none";
-                        }, 380);
-                    }, secondIntroDurationMs);
                 }, introDurationMs);
             });
             function StartAR() {
